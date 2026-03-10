@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Omnitab Demo</title>
+    <script type="module">
+    import { createBus } from '/dist/index.mjs'; // after build
+
+    const bus = createBus('demo');
+    const log = document.getElementById('log');
+
+    function addLog(msg) {
+      const entry = document.createElement('div');
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      log.appendChild(entry);
+    }
+
+    document.getElementById('publish').onclick = () => {
+      const event = document.getElementById('event').value;
+      const payload = document.getElementById('payload').value;
+      bus.publish(event, payload);
+      addLog(`Published: ${event} - ${payload}`);
+    };
+
+    document.getElementById('subscribe').onclick = () => {
+      const event = document.getElementById('subEvent').value;
+      bus.subscribe(event, (payload) => {
+        addLog(`Received: ${event} - ${payload}`);
+      });
+      addLog(`Subscribed to: ${event}`);
+    };
+  </script>
+</head>
+
+<body>
+    <h1>Omnitab Demo</h1>
+    <div>
+        <input id="event" placeholder="event name" value="test" />
+        <input id="payload" placeholder="payload" value="hello" />
+        <button id="publish">Publish</button>
+    </div>
+    <div>
+        <input id="subEvent" placeholder="event to subscribe" value="test" />
+        <button id="subscribe">Subscribe</button>
+    </div>
+    <div id="log" style="border:1px solid #ccc; padding:10px; margin-top:20px; height:300px; overflow:auto;"></div>
+</body>
+
+</html>
