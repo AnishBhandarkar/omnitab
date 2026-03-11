@@ -1,21 +1,27 @@
 import { Transport } from './transport';
-import { BroadcastChannelTransport } from './broadcast-channel';
-import { StorageEventTransport } from './storage-event';
+import { BroadcastChannelTransport, BroadcastChannelTransportOptions } from './broadcast-channel';
+import { StorageEventTransport, StorageEventTransportOptions } from './storage-event';
+import { SharedWorkerTransport, SharedWorkerTransportOptions } from './shared-worker';
 // We'll add SharedWorker and Storage transports later
+
+export interface FallbackChainOptions {
+    worker?: SharedWorkerTransportOptions;
+    broadcast?: BroadcastChannelTransportOptions;
+    storage?: StorageEventTransportOptions;
+}
 
 export class FallbackChain implements Transport {
     private transports: Transport[] = [];
     private activeTransport: Transport | null = null;
     private messageCallback: ((message: any) => void) | null = null;
 
-    constructor(channelName: string) {
+    constructor(private namespace: string,
+        private options: FallbackChainOptions = {}) {
         // Order by preference: best first
-        // TODO: Add SharedWorkerTransport when implemented
-        // TODO: Add StorageEventTransport when implemented
         this.transports = [
-            // new SharedWorkerTransport(channelName), // Future
-            new BroadcastChannelTransport(channelName),
-            new StorageEventTransport(channelName)
+            new SharedWorkerTransport(namespace, options.worker),
+            new BroadcastChannelTransport(namespace, options.broadcast),
+            new StorageEventTransport(namespace, options.storage),
         ].filter(t => t.isSupported());
     }
 

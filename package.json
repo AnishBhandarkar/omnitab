@@ -1,6 +1,7 @@
 {
   "scripts": {
     "build": "tsup",
+    "build:worker": "tsup src/workers/omnitab-shared-worker.ts --format iife --out-dir dist/workers",
     "dev": "tsup --watch"
   },
   "devDependencies": {
