@@ -103,9 +103,6 @@ export class SharedWorkerTransport implements Transport {
         });
     }
 
-    /**
-     * Send a message to all other tabs
-     */
     send(message: any): void {
         if (!this.connected) {
             console.log('[Tab] Not connected, queueing message');
@@ -124,16 +121,10 @@ export class SharedWorkerTransport implements Transport {
         });
     }
 
-    /**
-     * Register callback for incoming messages
-     */
     onMessage(callback: (message: any) => void): void {
         this.messageCallback = callback;
     }
 
-    /**
-     * Disconnect from worker and clean up
-     */
     disconnect(): void {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
@@ -158,25 +149,15 @@ export class SharedWorkerTransport implements Transport {
         this.pendingMessages = [];
     }
 
-    /**
-     * Check if SharedWorker is supported in this browser
-     */
     isSupported(): boolean {
         return typeof SharedWorker !== 'undefined';
     }
 
-    /**
-     * Get the worker script URL
-     * This depends on how you bundle the worker
-     */
     private getWorkerUrl(): string {
         const workerUrl = new URL('./workers/omnitab-shared-worker.js', import.meta.url);
         return workerUrl.href;
     }
 
-    /**
-     * Handle messages from the worker
-     */
     private handleWorkerMessage(message: any): void {
         switch (message.type) {
             case 'PUBLISH':
@@ -215,9 +196,6 @@ export class SharedWorkerTransport implements Transport {
         }
     }
 
-    /**
-     * Send message to worker
-     */
     private sendToWorker(message: any): void {
         if (this.worker) {
             try {
@@ -228,9 +206,6 @@ export class SharedWorkerTransport implements Transport {
         }
     }
 
-    /**
-     * Send any messages that were queued while connecting
-     */
     private flushPendingMessages(): void {
         while (this.pendingMessages.length > 0) {
             const message = this.pendingMessages.shift();
@@ -238,10 +213,6 @@ export class SharedWorkerTransport implements Transport {
         }
     }
 
-    /**
-     * Start heartbeat to keep connection alive and detect dead tabs
-     * Worker uses PING to track active tabs and clean up stale ones
-     */
     private startHeartbeat(): void {
         this.heartbeatInterval = window.setInterval(() => {
             if (this.connected) {
