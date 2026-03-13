@@ -1,34 +1,10 @@
 import { Transport } from './transport';
-import { BroadcastChannelTransport, BroadcastChannelTransportOptions } from './broadcast-channel';
-import { StorageEventTransport, StorageEventTransportOptions } from './storage-event';
-import { SharedWorkerTransport, SharedWorkerTransportOptions } from './shared-worker';
-// We'll add SharedWorker and Storage transports later
+import { BroadcastChannelTransport } from './broadcast-channel';
+import { StorageEventTransport } from './storage-event';
+import { SharedWorkerTransport } from './shared-worker';
+import { FallbackChainOptions, QueuedMessage } from '../types';
 
-export interface FallbackChainOptions {
-    worker?: SharedWorkerTransportOptions;
-    broadcast?: BroadcastChannelTransportOptions;
-    storage?: StorageEventTransportOptions;
 
-    /** Enable health checks (default: false) */
-    enableHealthChecks?: boolean;
-    /** Health check interval in ms (default: 10000) */
-    healthCheckInterval?: number;
-
-    /** Enable message queue with retry (default: false) */
-    enableMessageQueue?: boolean;
-    /** Max retry attempts per message (default: 3) */
-    maxRetries?: number;
-    /** Retry backoff multiplier (default: 2) */
-    retryBackoff?: number;
-    /** Initial retry delay in ms (default: 1000) */
-    retryDelay?: number;
-}
-
-interface QueuedMessage {
-    message: any;
-    attempts: number;
-    timestamp: number;
-}
 
 export class FallbackChain implements Transport {
     private transports: Transport[] = [];
@@ -50,7 +26,7 @@ export class FallbackChain implements Transport {
         // Order by preference: best first
         this.transports = [
             new SharedWorkerTransport(namespace, options.worker),
-            new BroadcastChannelTransport(namespace, options.broadcast),
+            new BroadcastChannelTransport(namespace),
             new StorageEventTransport(namespace, options.storage),
         ].filter(t => t.isSupported());
 

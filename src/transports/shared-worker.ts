@@ -1,12 +1,7 @@
+import { SharedWorkerTransportOptions } from '../types';
 import { Transport } from './transport';
 
-export interface SharedWorkerTransportOptions {
-    /** Timeout for worker connection in ms */
-    connectTimeout?: number;
 
-    /** Heartbeat interval in ms */
-    heartbeatInterval?: number;
-}
 
 export class SharedWorkerTransport implements Transport {
     private worker: SharedWorker | null = null;

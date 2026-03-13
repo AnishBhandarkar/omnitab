@@ -1,22 +1,9 @@
 /// <reference lib="webworker" />
 
+import { ConnectedTab } from "../types";
+
 declare const self: SharedWorkerGlobalScope;
 export { };
-
-// ============================================================================
-// Types
-// ============================================================================
-
-interface ConnectedTab {
-    port: MessagePort;
-    tabId: string;
-    connectedAt: number;
-    lastPing: number;
-}
-
-// ============================================================================
-// State
-// ============================================================================
 
 const tabs = new Map<string, ConnectedTab>();
 const handlers: Map<string, (message: any, sender: ConnectedTab) => void> = new Map();

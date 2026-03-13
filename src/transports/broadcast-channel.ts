@@ -1,36 +1,12 @@
-// src/transports/broadcast-channel.ts
-
 import { Transport } from "./transport";
-
-/**
- * Options for BroadcastChannel transport
- * 
- * BroadcastChannel is the simplest transport with few config options,
- * but we still define an interface for consistency with other transports
- * and future extensibility.
- */
-export interface BroadcastChannelTransportOptions {
-    /**
-     * Whether to log debug information
-     * @default false
-     */
-    debug?: boolean;
-}
 
 export class BroadcastChannelTransport implements Transport {
     private channel: BroadcastChannel | null = null;
     private messageCallback: ((message: any) => void) | null = null;
-    private options: Required<BroadcastChannelTransportOptions>;
 
     constructor(
-        private namespace: string,
-        options: BroadcastChannelTransportOptions = {}
-    ) {
-        this.options = {
-            debug: false,
-            ...options
-        };
-    }
+        private namespace: string
+    ) { }
 
     async connect(): Promise<void> {
         if (!this.isSupported()) {
@@ -38,10 +14,6 @@ export class BroadcastChannelTransport implements Transport {
         }
 
         this.channel = new BroadcastChannel(this.namespace);
-
-        if (this.options.debug) {
-            console.log(`[BroadcastChannel] Connected to channel: ${this.namespace}`);
-        }
 
         this.channel.onmessage = (event) => {
             if (this.messageCallback) {
@@ -53,10 +25,6 @@ export class BroadcastChannelTransport implements Transport {
     send(message: any): void {
         if (this.channel) {
             this.channel.postMessage(message);
-
-            if (this.options.debug) {
-                console.log(`[BroadcastChannel] Sent:`, message);
-            }
         }
     }
 
@@ -70,10 +38,6 @@ export class BroadcastChannelTransport implements Transport {
             this.channel = null;
         }
         this.messageCallback = null;
-
-        if (this.options.debug) {
-            console.log(`[BroadcastChannel] Disconnected`);
-        }
     }
 
     isSupported(): boolean {

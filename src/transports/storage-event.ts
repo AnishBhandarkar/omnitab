@@ -34,84 +34,10 @@
  * This is the safest default because we never risk deleting app data.
  */
 
+import { StorageEventMessage, StorageEventTransportOptions, StorageFullError } from '../types';
 import { Transport } from './transport';
 
-export interface StorageEventMessage {
-    /** Unique message ID (timestamp + random) */
-    id: string;
-    /** When the message was created */
-    timestamp: number;
-    /** Namespace to isolate multiple Omnitab instances */
-    namespace: string;
-    /** The actual message payload */
-    data: any;
-    /** Message size in bytes (for monitoring) */
-    size?: number;
-}
 
-export interface StorageFullError extends Error {
-    name: 'StorageFullError';
-    /** Current storage usage in bytes */
-    currentUsage: number;
-    /** Estimated quota in bytes (if detectable) */
-    estimatedQuota?: number;
-}
-
-export interface StorageEventTransportOptions {
-    /** 
-     * Time-to-live for messages in milliseconds. 
-     * Messages older than this are ignored and deleted.
-     * @default 5000 (5 seconds)
-     */
-    ttl?: number;
-
-    /** 
-     * Maximum number of messages to store simultaneously.
-     * Prevents unlimited growth if cleanup fails.
-     * @default 100
-     */
-    maxMessages?: number;
-
-    /** 
-     * Maximum message size in bytes.
-     * Prevents giant messages from filling storage.
-     * @default 102400 (100KB)
-     */
-    maxMessageSize?: number;
-
-    /** 
-     * What to do when localStorage is full.
-     * 
-     * - 'none': (SAFE DEFAULT) Don't evict anything. Notify via callback and fail.
-     * - 'oldest': Delete oldest messages to make room.
-     * - 'error': Throw error and don't attempt storage.
-     * 
-     * ⚠️ WARNING: 'oldest' may delete messages from other tabs/apps
-     * that share the same namespace prefix. Use with caution.
-     * 
-     * @default 'none'
-     */
-    evictionPolicy?: 'none' | 'oldest' | 'error';
-
-    /** 
-     * Callback when storage is full.
-     * Useful for apps to show warnings or implement custom handling.
-     */
-    onStorageFull?: (error: StorageFullError) => void;
-
-    /** 
-     * Threshold (0-1) for storage warning.
-     * Warning logged when usage exceeds this percentage of estimated quota.
-     * @default 0.8 (80%)
-     */
-    warnThreshold?: number;
-
-    /** 
-     * Enable periodic storage monitoring.
-     * @default true
-     */
-    enableMonitoring?: boolean;
-}
 
 export class StorageEventTransport implements Transport {
     private readonly STORAGE_KEY_PREFIX = 'omnitab:';
