@@ -402,7 +402,7 @@ export class StorageEventTransport implements Transport {
     private startMonitoring(): void {
         this.monitorInterval = setInterval(() => {
             this.monitorStorageUsage();
-        }, 60000); // Every minute
+        }, this.WARNING_COOLDOWN); // Every minute
     }
 
     private monitorStorageUsage(): void {

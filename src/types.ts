@@ -112,4 +112,3 @@ export interface StorageFullError extends Error {
     currentUsage: number;
     estimatedQuota?: number;
 }
-
