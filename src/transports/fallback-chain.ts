@@ -3,6 +3,7 @@ import { BroadcastChannelTransport } from './broadcast-channel';
 import { StorageEventTransport } from './storage-event';
 import { SharedWorkerTransport } from './shared-worker';
 import { FallbackChainOptions, QueuedMessage } from '../types';
+import { DEFAULT_HEALTH_CHECK, DEFAULT_QUEUE_CONFIG } from '../constants';
 
 
 
@@ -22,7 +23,7 @@ export class FallbackChain implements Transport {
         private namespace: string,
         private options: FallbackChainOptions = {}
     ) {
-        
+
         // Order by preference: best first
         this.transports = [
             new SharedWorkerTransport(namespace, options.worker),
@@ -34,11 +35,9 @@ export class FallbackChain implements Transport {
         this.logBrowserSupport();
 
         // Set defaults
-        this.options.maxRetries = options.maxRetries || 3;
-        this.options.retryBackoff = options.retryBackoff || 2;
-        this.options.retryDelay = options.retryDelay || 1000;
-
-
+        this.options.maxRetries = options.maxRetries || DEFAULT_QUEUE_CONFIG.MAX_RETRIES;
+        this.options.retryBackoff = options.retryBackoff || DEFAULT_QUEUE_CONFIG.RETRY_BACKOFF;
+        this.options.retryDelay = options.retryDelay || DEFAULT_QUEUE_CONFIG.RETRY_DELAY;
     }
 
     async connect(): Promise<void> {
@@ -120,7 +119,7 @@ export class FallbackChain implements Transport {
     private startHealthChecks(): void {
         if (this.healthCheckInterval) return;
 
-        const interval = this.options.healthCheckInterval || 10000;
+        const interval = this.options.healthCheckInterval || DEFAULT_HEALTH_CHECK.HEALTH_CHECK_INTERVAL;
 
         this.healthCheckInterval = window.setInterval(() => {
             this.checkHealth();

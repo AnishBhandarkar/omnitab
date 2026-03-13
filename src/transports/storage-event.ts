@@ -34,6 +34,7 @@
  * This is the safest default because we never risk deleting app data.
  */
 
+import { DEFAULT_STORAGE_OPTIONS } from '../constants';
 import { StorageEventMessage, StorageEventTransportOptions, StorageFullError } from '../types';
 import { Transport } from './transport';
 
@@ -59,15 +60,15 @@ export class StorageEventTransport implements Transport {
         private namespace: string,
         options: StorageEventTransportOptions = {}
     ) {
-        // Set defaults with SAFE eviction policy
+        // Set defaults
         this.options = {
-            ttl: 5000,
-            maxMessages: 100,
-            maxMessageSize: 100 * 1024, // 100KB
-            evictionPolicy: 'none', // SAFE DEFAULT
+            ttl: DEFAULT_STORAGE_OPTIONS.TTL,
+            maxMessages: DEFAULT_STORAGE_OPTIONS.MAX_MESSAGES,
+            maxMessageSize: DEFAULT_STORAGE_OPTIONS.MAX_MESSAGE_SIZE,
+            evictionPolicy: DEFAULT_STORAGE_OPTIONS.EVICTION_POLICY,
             onStorageFull: () => { },
-            warnThreshold: 0.8,
-            enableMonitoring: true,
+            warnThreshold: DEFAULT_STORAGE_OPTIONS.WARN_THRESHOLD,
+            enableMonitoring: DEFAULT_STORAGE_OPTIONS.ENABLE_MONITORING,
             ...options
         };
     }

@@ -4,7 +4,6 @@ import { generateTabId } from './utils/tabId';
 export interface Bus {
     publish(event: string, payload?: any): void;
     subscribe(event: string, handler: (payload: any) => void): () => void;
-    // Future: request(), respond(), leader election, etc.
 }
 
 export function createBus(namespace: string = 'omnitab'): Bus {

@@ -1,3 +1,4 @@
+import { DEFAULT_WORKER_OPTIONS } from '../constants';
 import { SharedWorkerTransportOptions } from '../types';
 import { Transport } from './transport';
 
@@ -24,8 +25,8 @@ export class SharedWorkerTransport implements Transport {
         options: SharedWorkerTransportOptions = {}
     ) {
         this.options = {
-            connectTimeout: 5000,
-            heartbeatInterval: 15000, // Send PING every 15 seconds
+            connectTimeout: DEFAULT_WORKER_OPTIONS.CONNECT_TIMEOUT,
+            heartbeatInterval: DEFAULT_WORKER_OPTIONS.HEARTBEAT_INTERVAL, // Send PING every 15 seconds
             ...options
         };
 

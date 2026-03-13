@@ -1,0 +1,25 @@
+export const DEFAULT_STORAGE_OPTIONS = {
+    TTL: 5000,
+    MAX_MESSAGE_SIZE: 100 * 1024, // 100kb
+    MAX_MESSAGES: 100,
+    EVICTION_POLICY: 'none' as const,
+    WARN_THRESHOLD: 0.8,
+    ENABLE_MONITORING: true
+} as const;
+
+export const DEFAULT_WORKER_OPTIONS = {
+    CONNECT_TIMEOUT: 5000,
+    HEARTBEAT_INTERVAL: 15000
+} as const;
+
+export const DEFAULT_HEALTH_CHECK = {
+    HEALTH_CHECK_ENABLE: false,
+    HEALTH_CHECK_INTERVAL: 10000
+} as const;
+
+export const DEFAULT_QUEUE_CONFIG = {
+    ENABLE_QUEUE: false,
+    MAX_RETRIES: 3,
+    RETRY_BACKOFF: 2,
+    RETRY_DELAY: 1000
+} as const;
