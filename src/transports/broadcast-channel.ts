@@ -15,18 +15,6 @@ export interface BroadcastChannelTransportOptions {
      * @default false
      */
     debug?: boolean;
-
-    /**
-     * Custom name for the broadcast channel
-     * If not provided, namespace is used
-     */
-    channelName?: string;
-
-    /**
-     * Whether to automatically reconnect if channel closes
-     * @default true
-     */
-    autoReconnect?: boolean;
 }
 
 export class BroadcastChannelTransport implements Transport {
@@ -40,8 +28,6 @@ export class BroadcastChannelTransport implements Transport {
     ) {
         this.options = {
             debug: false,
-            channelName: namespace,  // Use namespace as default channel name
-            autoReconnect: true,
             ...options
         };
     }
@@ -51,11 +37,10 @@ export class BroadcastChannelTransport implements Transport {
             throw new Error('BroadcastChannel not supported');
         }
 
-        const channelName = this.options.channelName || this.namespace;
-        this.channel = new BroadcastChannel(channelName);
+        this.channel = new BroadcastChannel(this.namespace);
 
         if (this.options.debug) {
-            console.log(`[BroadcastChannel] Connected to channel: ${channelName}`);
+            console.log(`[BroadcastChannel] Connected to channel: ${this.namespace}`);
         }
 
         this.channel.onmessage = (event) => {

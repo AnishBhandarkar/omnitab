@@ -1,35 +1,34 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Omnitab Direct Test</title>
 </head>
+
 <body>
     <h1>Omnitab Direct Test - Tab <span id="tabId">?</span></h1>
     <button id="publish">Publish</button>
     <div id="log"></div>
 
     <script type="module">
-    import { createBus } from '/dist/index.mjs';
-    
-    const bus = createBus('demo');
-    const tabId = Math.random().toString(36).substring(2, 6);
-    document.getElementById('tabId').textContent = tabId;
-    
-    // DIRECT: Assign callback right after bus creation
-    bus.messageCallback = (msg) => {
-        const log = document.getElementById('log');
-        log.innerHTML += `<div style="color:green">✅ GOT: ${msg.payload} at ${new Date().toLocaleTimeString()}</div>`;
-    };
-    
-    // Also use the proper API
-    bus.subscribe('test', (payload) => {
-        const log = document.getElementById('log');
-        log.innerHTML += `<div style="color:blue">🔵 SUBSCRIBER: ${payload}</div>`;
-    });
-    
-    document.getElementById('publish').onclick = () => {
-        bus.publish('test', 'hello from ' + tabId);
-    };
+        import { createBus } from '/dist/index.mjs';
+
+        const bus = createBus('demo');
+        const tabId = Math.random().toString(36).substring(2, 6);
+        document.getElementById('tabId').textContent = tabId;
+
+        // USE THE PUBLIC API - this works
+        bus.subscribe('test', (payload) => {
+            const log = document.getElementById('log');
+            log.innerHTML += `<div style="color:blue">🔵 RECEIVED: ${payload} at ${new Date().toLocaleTimeString()}</div>`;
+        });
+
+        document.getElementById('publish').onclick = () => {
+            bus.publish('test', 'hello from ' + tabId);
+            const log = document.getElementById('log');
+            log.innerHTML += `<div style="color:black">📤 PUBLISHED: hello from ${tabId}</div>`;
+        };
     </script>
 </body>
+
 </html>
