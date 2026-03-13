@@ -1,5 +1,5 @@
 import { FallbackChain } from './transports/fallback-chain';
-import { generateTabId } from './utils/tabId';
+import { generateTabId } from './helper';
 
 export interface Bus {
     publish(event: string, payload?: any): void;

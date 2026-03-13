@@ -1,8 +1,7 @@
 import { DEFAULT_WORKER_OPTIONS } from '../constants';
 import { SharedWorkerTransportOptions } from '../types';
+import { generateTabId } from '../helper';
 import { Transport } from './transport';
-
-
 
 export class SharedWorkerTransport implements Transport {
     private worker: SharedWorker | null = null;
@@ -10,14 +9,8 @@ export class SharedWorkerTransport implements Transport {
     private connected: boolean = false;
     private tabId: string;
     private options: Required<SharedWorkerTransportOptions>;
-
-    // Heartbeat
     private heartbeatInterval: number | null = null;
-
-    // Pending messages while connecting
     private pendingMessages: any[] = [];
-
-    // Connection promise
     private connectionPromise: Promise<void> | null = null;
 
     constructor(
@@ -30,7 +23,7 @@ export class SharedWorkerTransport implements Transport {
             ...options
         };
 
-        this.tabId = this.generateTabId();
+        this.tabId = generateTabId();
     }
 
     async connect(): Promise<void> {
@@ -177,8 +170,6 @@ export class SharedWorkerTransport implements Transport {
      * This depends on how you bundle the worker
      */
     private getWorkerUrl(): string {
-        // THIS IS THE KEY: import.meta.url gives us the current file's location
-        // We know our worker is in '../workers/omnitab-shared-worker.js' relative to this file
         const workerUrl = new URL('./workers/omnitab-shared-worker.js', import.meta.url);
         return workerUrl.href;
     }
@@ -261,16 +252,5 @@ export class SharedWorkerTransport implements Transport {
                 });
             }
         }, this.options.heartbeatInterval);
-    }
-
-    /**
-     * Generate a unique ID for this tab instance
-     * Format: timestamp-random-uuid (e.g., "1a2b3c-xyz789-4d5e6f")
-     */
-    private generateTabId(): string {
-        const timestamp = Date.now().toString(36);
-        const random = Math.random().toString(36).substring(2, 10);
-        const unique = crypto.randomUUID?.().split('-')[0] || random;
-        return `${timestamp}-${random}-${unique}`;
     }
 }

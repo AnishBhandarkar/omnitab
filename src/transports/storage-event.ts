@@ -60,7 +60,6 @@ export class StorageEventTransport implements Transport {
         private namespace: string,
         options: StorageEventTransportOptions = {}
     ) {
-        // Set defaults
         this.options = {
             ttl: DEFAULT_STORAGE_OPTIONS.TTL,
             maxMessages: DEFAULT_STORAGE_OPTIONS.MAX_MESSAGES,

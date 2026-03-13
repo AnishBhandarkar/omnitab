@@ -8,9 +8,7 @@ export { };
 const tabs = new Map<string, ConnectedTab>();
 const handlers: Map<string, (message: any, sender: ConnectedTab) => void> = new Map();
 
-// ============================================================================
 // Message Handlers
-// ============================================================================
 
 handlers.set('REGISTER', (message, sender) => {
     const { tabId } = message.data;
@@ -39,6 +37,7 @@ handlers.set('REGISTER', (message, sender) => {
     }, tabId);
 });
 
+
 handlers.set('PUBLISH', (message, sender) => {
     const { event, payload } = message.data;
 
@@ -52,6 +51,7 @@ handlers.set('PUBLISH', (message, sender) => {
     }, sender.tabId);
 });
 
+
 handlers.set('PING', (message, sender) => {
     const tab = tabs.get(sender.tabId);
     if (tab) {
@@ -64,13 +64,14 @@ handlers.set('PING', (message, sender) => {
     });
 });
 
+
 handlers.set('DISCONNECT', (message, sender) => {
     handleTabDisconnect(sender.tabId);
 });
 
-// ============================================================================
+
+
 // Connection Handling
-// ============================================================================
 
 self.onconnect = (event: MessageEvent) => {
     const port = event.ports[0];
@@ -81,6 +82,7 @@ self.onconnect = (event: MessageEvent) => {
 
     port.start();
 };
+
 
 function handleMessage(message: any, port: MessagePort) {
     const { type, tabId, data } = message;
@@ -110,9 +112,9 @@ function handleMessage(message: any, port: MessagePort) {
     }
 }
 
-// ============================================================================
+
+
 // Utilities
-// ============================================================================
 
 function broadcastToAll(message: any, excludeTabId?: string) {
     tabs.forEach((tab, tabId) => {
@@ -125,6 +127,7 @@ function broadcastToAll(message: any, excludeTabId?: string) {
         }
     });
 }
+
 
 function handleTabDisconnect(tabId: string) {
     const removed = tabs.delete(tabId);
@@ -140,10 +143,9 @@ function handleTabDisconnect(tabId: string) {
     }
 }
 
-// ============================================================================
-// Maintenance
-// ============================================================================
 
+
+// Maintenance
 setInterval(() => {
     const now = Date.now();
     const STALE_TIMEOUT = 30000;
@@ -155,8 +157,6 @@ setInterval(() => {
     });
 }, 10000);
 
-// ============================================================================
-// Init
-// ============================================================================
 
+// Init
 console.log('[SharedWorker] Omnitab SharedWorker started');

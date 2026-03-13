@@ -5,16 +5,12 @@ import { SharedWorkerTransport } from './shared-worker';
 import { FallbackChainOptions, QueuedMessage } from '../types';
 import { DEFAULT_HEALTH_CHECK, DEFAULT_QUEUE_CONFIG } from '../constants';
 
-
-
 export class FallbackChain implements Transport {
     private transports: Transport[] = [];
     private activeTransport: Transport | null = null;
     private messageCallback: ((message: any) => void) | null = null;
     private healthCheckInterval: number | null = null;
     private isCheckingHealth: boolean = false;
-
-    // Message queue
     private messageQueue: QueuedMessage[] = [];
     private isProcessingQueue: boolean = false;
     private queueRetryTimer: number | null = null;
@@ -34,7 +30,6 @@ export class FallbackChain implements Transport {
         // Log browser support info
         this.logBrowserSupport();
 
-        // Set defaults
         this.options.maxRetries = options.maxRetries || DEFAULT_QUEUE_CONFIG.MAX_RETRIES;
         this.options.retryBackoff = options.retryBackoff || DEFAULT_QUEUE_CONFIG.RETRY_BACKOFF;
         this.options.retryDelay = options.retryDelay || DEFAULT_QUEUE_CONFIG.RETRY_DELAY;
@@ -76,11 +71,9 @@ export class FallbackChain implements Transport {
             return;
         }
 
-        // If queue is enabled, use it
         if (this.options.enableMessageQueue) {
             this.queueMessage(message);
         } else {
-            // Direct send (existing behavior)
             this.directSend(message);
         }
     }
@@ -105,16 +98,9 @@ export class FallbackChain implements Transport {
         return this.transports.length > 0;
     }
 
-    /**
-     * Get current active transport name (for debugging)
-     */
     getActiveTransport(): string {
         return this.activeTransport?.constructor.name || 'none';
     }
-
-    // ============================================================================
-    // Health Checks (Optional - opt-in via options.enableHealthChecks)
-    // ============================================================================
 
     private startHealthChecks(): void {
         if (this.healthCheckInterval) return;
@@ -139,19 +125,15 @@ export class FallbackChain implements Transport {
         this.isCheckingHealth = true;
 
         try {
-            // Try to send a ping (works with all transports)
             // Using a special internal message that transports will ignore
             this.activeTransport.send({
                 type: '__health_check__',
                 timestamp: Date.now()
             });
-
-            // If we get here, send succeeded
             this.isCheckingHealth = false;
 
         } catch (error) {
             console.warn(`Omnitab: Health check failed on ${this.activeTransport.constructor.name}`);
-
             // Transport is dead, try to reconnect
             await this.reconnect();
             this.isCheckingHealth = false;
@@ -175,10 +157,6 @@ export class FallbackChain implements Transport {
         await this.connect();
     }
 
-    // ============================================================================
-    // Direct Send (No Queue)
-    // ============================================================================
-
     private directSend(message: any): void {
         try {
             this.activeTransport?.send(message);
@@ -190,10 +168,6 @@ export class FallbackChain implements Transport {
             }
         }
     }
-
-    // ============================================================================
-    // Message Queue with Retry
-    // ============================================================================
 
     private queueMessage(message: any): void {
         this.messageQueue.push({
