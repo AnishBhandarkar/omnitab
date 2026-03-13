@@ -4,12 +4,6 @@ export interface SharedWorkerTransportOptions {
     /** Timeout for worker connection in ms */
     connectTimeout?: number;
 
-    /** Enable leader election */
-    enableLeaderElection?: boolean;
-
-    /** Callback when leader changes */
-    onLeaderChange?: (leaderId: string | null) => void;
-
     /** Heartbeat interval in ms */
     heartbeatInterval?: number;
 }
@@ -23,11 +17,6 @@ export class SharedWorkerTransport implements Transport {
 
     // Heartbeat
     private heartbeatInterval: number | null = null;
-    private lastHeartbeat: number = 0;
-
-    // Leader election
-    private isLeader: boolean = false;
-    private currentLeader: string | null = null;
 
     // Pending messages while connecting
     private pendingMessages: any[] = [];
@@ -41,9 +30,7 @@ export class SharedWorkerTransport implements Transport {
     ) {
         this.options = {
             connectTimeout: 5000,
-            enableLeaderElection: true,
-            onLeaderChange: () => { },
-            heartbeatInterval: 5000,
+            heartbeatInterval: 15000, // Send PING every 15 seconds
             ...options
         };
 
@@ -127,6 +114,9 @@ export class SharedWorkerTransport implements Transport {
         });
     }
 
+    /**
+     * Send a message to all other tabs
+     */
     send(message: any): void {
         if (!this.connected) {
             console.log('[Tab] Not connected, queueing message');
@@ -145,10 +135,16 @@ export class SharedWorkerTransport implements Transport {
         });
     }
 
+    /**
+     * Register callback for incoming messages
+     */
     onMessage(callback: (message: any) => void): void {
         this.messageCallback = callback;
     }
 
+    /**
+     * Disconnect from worker and clean up
+     */
     disconnect(): void {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
@@ -170,43 +166,14 @@ export class SharedWorkerTransport implements Transport {
 
         this.connected = false;
         this.connectionPromise = null;
-        this.isLeader = false;
-        this.currentLeader = null;
         this.pendingMessages = [];
     }
 
+    /**
+     * Check if SharedWorker is supported in this browser
+     */
     isSupported(): boolean {
         return typeof SharedWorker !== 'undefined';
-    }
-
-    /**
-     * Check if this tab is the leader
-     */
-    isLeaderTab(): boolean {
-        return this.isLeader;
-    }
-
-    /**
-     * Get current leader tab ID
-     */
-    getCurrentLeader(): string | null {
-        return this.currentLeader;
-    }
-
-    /**
-     * Request leader election (if not already leader)
-     */
-    requestLeaderElection(): void {
-        if (!this.options.enableLeaderElection) return;
-
-        this.sendToWorker({
-            type: 'LEADER_ELECTION',
-            tabId: this.tabId,
-            data: {
-                voteFor: this.tabId,
-                timestamp: Date.now()
-            }
-        });
     }
 
     /**
@@ -220,6 +187,9 @@ export class SharedWorkerTransport implements Transport {
         return workerUrl.href;
     }
 
+    /**
+     * Handle messages from the worker
+     */
     private handleWorkerMessage(message: any): void {
         switch (message.type) {
             case 'PUBLISH':
@@ -231,25 +201,6 @@ export class SharedWorkerTransport implements Transport {
                         payload: message.data.payload,
                         fromTabId: message.data.fromTabId
                     });
-                }
-                break;
-
-            case 'LEADER_ELECTED':
-                this.currentLeader = message.data.leader;
-                this.isLeader = (this.currentLeader === this.tabId);
-                this.options.onLeaderChange(this.currentLeader);
-
-                console.log(`[SharedWorker] Leader ${this.isLeader ? 'elected (this tab)' : 'elected'}: ${this.currentLeader}`);
-                break;
-
-            case 'LEADER_ELECTION_NEEDED':
-                // Start election if we're the oldest tab or random
-                if (this.options.enableLeaderElection && !this.isLeader) {
-                    // Simple election: first to respond becomes leader
-                    // In production, you'd want a proper algorithm
-                    setTimeout(() => {
-                        this.requestLeaderElection();
-                    }, Math.random() * 100); // Random delay to avoid collisions
                 }
                 break;
 
@@ -265,12 +216,10 @@ export class SharedWorkerTransport implements Transport {
                 // Connection confirmed
                 console.log('[Tab] Registration confirmed');
                 this.connected = true;
-                this.currentLeader = message.data.leader;
-                this.isLeader = (this.currentLeader === this.tabId);
                 break;
 
             case 'PONG':
-                this.lastHeartbeat = Date.now();
+                // Heartbeat response - connection is alive
                 break;
 
             case 'ERROR':
@@ -279,6 +228,9 @@ export class SharedWorkerTransport implements Transport {
         }
     }
 
+    /**
+     * Send message to worker
+     */
     private sendToWorker(message: any): void {
         if (this.worker) {
             try {
@@ -289,6 +241,9 @@ export class SharedWorkerTransport implements Transport {
         }
     }
 
+    /**
+     * Send any messages that were queued while connecting
+     */
     private flushPendingMessages(): void {
         while (this.pendingMessages.length > 0) {
             const message = this.pendingMessages.shift();
@@ -296,6 +251,10 @@ export class SharedWorkerTransport implements Transport {
         }
     }
 
+    /**
+     * Start heartbeat to keep connection alive and detect dead tabs
+     * Worker uses PING to track active tabs and clean up stale ones
+     */
     private startHeartbeat(): void {
         this.heartbeatInterval = window.setInterval(() => {
             if (this.connected) {
@@ -304,19 +263,14 @@ export class SharedWorkerTransport implements Transport {
                     tabId: this.tabId,
                     data: { timestamp: Date.now() }
                 });
-
-                // If leader, send heartbeat
-                if (this.isLeader) {
-                    this.sendToWorker({
-                        type: 'LEADER_HEARTBEAT',
-                        tabId: this.tabId,
-                        data: { timestamp: Date.now() }
-                    });
-                }
             }
         }, this.options.heartbeatInterval);
     }
 
+    /**
+     * Generate a unique ID for this tab instance
+     * Format: timestamp-random-uuid (e.g., "1a2b3c-xyz789-4d5e6f")
+     */
     private generateTabId(): string {
         const timestamp = Date.now().toString(36);
         const random = Math.random().toString(36).substring(2, 10);
