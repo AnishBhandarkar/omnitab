@@ -5,7 +5,8 @@ export default defineConfig([{
     format: ['esm', 'iife'],
     dts: true,
     clean: true,
-    sourcemap: true,
+    sourcemap: false,
+    minify: true,
     globalName: 'Omnitab',
     platform: 'browser',
     outDir: 'dist'
@@ -15,6 +16,7 @@ export default defineConfig([{
     outDir: 'dist/workers',
     outExtension: () => ({ js: '.js' }), // Force .js extension
     clean: false,  // Don't clean between builds
-    sourcemap: true,
+    sourcemap: false,
+    minify: true,
     dts: false,    // Workers don't need .d.ts files
 }]);

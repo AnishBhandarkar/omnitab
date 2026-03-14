@@ -1,4 +1,29 @@
-{
+{"name": "omnitab",
+  "version": "1.0.1",
+  "description": "Cross-tab communication made simple",
+  "main": "dist/index.global.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "!dist/**/*.map", 
+    "LICENSE"
+  ],
+  "keywords": [
+    "cross-tab",
+    "sharedworker",
+    "broadcastchannel",
+    "localstorage",
+    "communication"
+  ],
+  "author": "Anish Bhandarkar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AnishBhandarkar/omnitab"
+  },
   "scripts": {
     "build": "tsup",
     "build:worker": "tsup src/workers/omnitab-shared-worker.ts --format iife --out-dir dist/workers",
