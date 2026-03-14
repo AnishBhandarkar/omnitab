@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**Real-time cross-tab communication for the browser — zero dependencies.**
+**Real-time cross-tab communication for the browser - zero dependencies.**
 
 [![npm version](https://img.shields.io/npm/v/omnitab.svg?style=flat-square)](https://www.npmjs.com/package/omnitab)
 [![npm downloads](https://img.shields.io/npm/dm/omnitab.svg?style=flat-square)](https://www.npmjs.com/package/omnitab)
@@ -18,7 +18,7 @@
 
 ## What is Omnitab?
 
-Browser tabs are isolated from each other by default — making it hard to coordinate behavior across multiple tabs of the same app. **Omnitab** solves this with a simple pub/sub message bus that works across all open tabs, handling browser inconsistencies automatically behind the scenes.
+Browser tabs are isolated from each other by default - making it hard to coordinate behavior across multiple tabs of the same app. **Omnitab** solves this with a simple pub/sub message bus that works across all open tabs, handling browser inconsistencies automatically behind the scenes.
 
 It selects the best available transport via an **automatic fallback chain**:
 
@@ -42,7 +42,7 @@ No configuration required to get started. Works in Safari, IE11, and mobile brow
 | 📬 **Message queue** | Queued sends with exponential backoff retry on failure |
 | 🔍 **Tab discovery** | Track and enumerate all open tabs |
 | ⚠️ **Compat warnings** | Console report on initialization with browser capability info |
-| 0️⃣ **Zero dependencies** | No external packages — lightweight and self-contained |
+| 0️⃣ **Zero dependencies** | No external packages - lightweight and self-contained |
 | 🟦 **TypeScript support** | Full type definitions included |
 
 ---
@@ -136,7 +136,7 @@ const bus = createBus('my-app', {
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `namespace` | `string` | `'omnitab'` | Scopes messages — tabs on the same namespace communicate |
+| `namespace` | `string` | `'omnitab'` | Scopes messages - tabs on the same namespace communicate |
 | `config` | `FallbackChainOptions` | `{}` | Optional configuration (see below) |
 
 ---
@@ -236,8 +236,8 @@ These options apply when Omnitab uses the **SharedWorker** transport (the defaul
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `connectTimeout` | `number` | — | Timeout in ms to establish a worker connection before falling back |
-| `heartbeatInterval` | `number` | — | Interval in ms for worker heartbeat pings to detect silent failures |
+| `connectTimeout` | `number` | - | Timeout in ms to establish a worker connection before falling back |
+| `heartbeatInterval` | `number` | - | Interval in ms for worker heartbeat pings to detect silent failures |
 
 ---
 
@@ -251,8 +251,8 @@ These options apply only when the **StorageEvent (localStorage)** fallback is ac
 | `maxMessageSize` | `number` | `102400` | Max message size in bytes (100 KB). Prevents large messages from filling storage. |
 | `maxMessages` | `number` | `100` | Max number of messages stored simultaneously. Prevents unbounded growth. |
 | `evictionPolicy` | `'none' \| 'oldest' \| 'error'` | `'none'` | Behaviour when localStorage is full (see details below) |
-| `onStorageFull` | `(error: StorageFullError) => void` | — | Callback fired when storage is full. Useful for custom warnings or handling. |
-| `warnThreshold` | `number` | `0.8` | Fraction of estimated quota (0–1) at which a storage usage warning is logged |
+| `onStorageFull` | `(error: StorageFullError) => void` | - | Callback fired when storage is full. Useful for custom warnings or handling. |
+| `warnThreshold` | `number` | `0.8` | Fraction of estimated quota (0-1) at which a storage usage warning is logged |
 | `enableMonitoring` | `boolean` | `true` | Periodically monitors storage usage against the warn threshold |
 
 #### Eviction Policy Details
@@ -286,7 +286,7 @@ On initialization, Omnitab logs a console report indicating which transport was 
 
 ### 🛒 Shopping Cart Sync
 
-Keep cart state consistent across all open tabs — no more stale totals or conflicting item counts.
+Keep cart state consistent across all open tabs - no more stale totals or conflicting item counts.
 
 ```ts
 const bus = createBus('shop');
@@ -400,7 +400,7 @@ const bus = createBus('my-app', {
 
 ## 📄 License
 
-MIT — see [LICENSE](./LICENSE) for details.
+MIT - see [LICENSE](./LICENSE) for details.
 
 ---
 
