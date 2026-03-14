@@ -19,7 +19,6 @@
         const tabId = Math.random().toString(36).substring(2, 6);
         document.getElementById('tabId').textContent = tabId;
 
-        // USE THE PUBLIC API - this works
         bus.subscribe('test', (payload) => {
             const log = document.getElementById('log');
             log.innerHTML += `<div style="color:blue">🔵 RECEIVED: ${payload} at ${new Date().toLocaleTimeString()}</div>`;
