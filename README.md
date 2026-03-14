@@ -268,15 +268,16 @@ These options apply only when the **StorageEvent (localStorage)** fallback is ac
 ## 🌐 Browser Support
 
 Omnitab automatically picks the best available transport per browser. Even in the worst case (IE11), the StorageEvent fallback ensures cross-tab messaging still works.
-
 | Browser | SharedWorker | BroadcastChannel | StorageEvent |
 |---|:---:|:---:|:---:|
 | Chrome (desktop) | ✅ | ✅ | ✅ |
 | Firefox (desktop) | ✅ | ✅ | ✅ |
-| Safari (desktop) | ❌ | ✅ | ✅ |
-| Mobile Safari | ❌ | ✅ | ✅ |
+| Safari (desktop) | ✅ 16+ | ✅ | ✅ |
+| Safari on iOS | ✅ 16+ | ✅ | ✅ |
 | Edge | ✅ | ✅ | ✅ |
+| Chrome for Android | ❌ | ✅ | ✅ |
 | IE11 | ❌ | ❌ | ✅ |
+| Samsung Internet | ❌ | ✅ | ✅ |
 
 On initialization, Omnitab logs a console report indicating which transport was selected and any browser-specific compatibility notes.
 
