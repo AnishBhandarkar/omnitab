@@ -13,7 +13,9 @@
     <script type="module">
         import { createBus } from '/dist/index.mjs';
 
-        const bus = createBus('demo');
+        const bus = createBus('demo', {
+            enableHealthChecks: true
+        });
         const tabId = Math.random().toString(36).substring(2, 6);
         document.getElementById('tabId').textContent = tabId;
 

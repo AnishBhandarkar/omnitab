@@ -1,13 +1,16 @@
 import { FallbackChain } from './transports/fallback-chain';
 import { generateTabId } from './helper';
+import { FallbackChainOptions } from './types';
 
 export interface Bus {
     publish(event: string, payload?: any): void;
     subscribe(event: string, handler: (payload: any) => void): () => void;
+    disconnect(): void;
 }
 
-export function createBus(namespace: string = 'omnitab'): Bus {
-    const transport = new FallbackChain(namespace);
+export function createBus(namespace: string = 'omnitab', config: FallbackChainOptions): Bus {
+    const transport = new FallbackChain(namespace, config);
+    console.log(transport);
     const tabId = generateTabId();
     const handlers = new Map<string, Set<(payload: any) => void>>();
 
@@ -21,7 +24,7 @@ export function createBus(namespace: string = 'omnitab'): Bus {
         }
     });
 
-    // Connect automatically (could be lazy or explicit)
+    // Connect automatically
     transport.connect().catch(err => {
         console.error('Omnitab failed to connect:', err);
     });
@@ -54,5 +57,9 @@ export function createBus(namespace: string = 'omnitab'): Bus {
                 }
             };
         },
+
+        disconnect() {
+            transport.disconnect();
+        }
     };
 }

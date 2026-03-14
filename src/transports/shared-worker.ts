@@ -19,7 +19,7 @@ export class SharedWorkerTransport implements Transport {
     ) {
         this.options = {
             connectTimeout: DEFAULT_WORKER_OPTIONS.CONNECT_TIMEOUT,
-            heartbeatInterval: DEFAULT_WORKER_OPTIONS.HEARTBEAT_INTERVAL, // Send PING every 15 seconds
+            heartbeatInterval: DEFAULT_WORKER_OPTIONS.HEARTBEAT_INTERVAL,
             ...options
         };
 
@@ -192,7 +192,36 @@ export class SharedWorkerTransport implements Transport {
 
             case 'ERROR':
                 console.error('[SharedWorker] Worker error:', message.data);
+
+                if (message.data.message === 'Not registered. Send REGISTER first.') {
+                    console.log('[SharedWorker] Connection lost, forcing reconnect...');
+                    this.forceReconnect();
+                }
                 break;
+        }
+    }
+
+    private async forceReconnect(): Promise<void> {
+        this.connected = false;
+
+        if (this.worker) {
+            try {
+                this.worker.port.close();
+            } catch (e) { }
+            this.worker = null;
+        }
+
+        this.connectionPromise = null;
+
+        // Reconnect
+        try {
+            await this.connect();
+            console.log('[SharedWorker] Reconnected successfully');
+
+            // Resend any pending messages
+            this.flushPendingMessages();
+        } catch (err) {
+            console.error('[SharedWorker] Reconnect failed:', err);
         }
     }
 

@@ -12,7 +12,7 @@ export class StorageEventTransport implements Transport {
     private messageQueue: any[] = [];
     private isProcessingQueue = false;
 
-    private monitorInterval: NodeJS.Timeout | null = null;
+    private monitorInterval: number | null = null;
     private lastWarningTime: number = 0;
     private readonly WARNING_COOLDOWN = 60000; // 1 minute between warnings
 
@@ -167,7 +167,6 @@ export class StorageEventTransport implements Transport {
         };
 
         try {
-            await this.enforceMaxMessages();
 
             // Try to store the message
             localStorage.setItem(key, JSON.stringify(storageMessage));
@@ -269,16 +268,6 @@ export class StorageEventTransport implements Transport {
         return error;
     }
 
-    private async enforceMaxMessages(): Promise<void> {
-        const messages = this.getAllMessages();
-
-        if (messages.length >= this.options.maxMessages) {
-            // Delete oldest 20% of messages
-            const deleteCount = Math.ceil(this.options.maxMessages * 0.2);
-            await this.evictOldestMessages(deleteCount);
-        }
-    }
-
     private getAllMessages(): Array<{ key: string, timestamp: number }> {
         const messages: Array<{ key: string, timestamp: number }> = [];
 
@@ -345,7 +334,6 @@ export class StorageEventTransport implements Transport {
 
     private async cleanup(all: boolean = false): Promise<void> {
         try {
-            const now = Date.now();
             const keysToRemove: string[] = [];
 
             for (let i = 0; i < localStorage.length; i++) {
@@ -359,12 +347,11 @@ export class StorageEventTransport implements Transport {
                     continue;
                 }
 
-
                 try {
                     const value = localStorage.getItem(key);
                     if (value) {
                         const message: StorageEventMessage = JSON.parse(value);
-                        if (now - message.timestamp > this.options.ttl) {
+                        if (Date.now() - message.timestamp > this.options.ttl) {
                             keysToRemove.push(key);
                         }
                     }
@@ -400,7 +387,7 @@ export class StorageEventTransport implements Transport {
     }
 
     private startMonitoring(): void {
-        this.monitorInterval = setInterval(() => {
+        this.monitorInterval = window.setInterval(() => {
             this.monitorStorageUsage();
         }, this.WARNING_COOLDOWN); // Every minute
     }

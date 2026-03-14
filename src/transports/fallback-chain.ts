@@ -9,8 +9,10 @@ export class FallbackChain implements Transport {
     private transports: Transport[] = [];
     private activeTransport: Transport | null = null;
     private messageCallback: ((message: any) => void) | null = null;
+
     private healthCheckInterval: number | null = null;
     private isCheckingHealth: boolean = false;
+
     private messageQueue: QueuedMessage[] = [];
     private isProcessingQueue: boolean = false;
     private queueRetryTimer: number | null = null;
@@ -20,19 +22,27 @@ export class FallbackChain implements Transport {
         private options: FallbackChainOptions = {}
     ) {
 
-        // Order by preference: best first
+        this.options = {
+            maxRetries: options.maxRetries ?? DEFAULT_QUEUE_CONFIG.MAX_RETRIES,
+            retryBackoff: options.retryBackoff ?? DEFAULT_QUEUE_CONFIG.RETRY_BACKOFF,
+            retryDelay: options.retryDelay ?? DEFAULT_QUEUE_CONFIG.RETRY_DELAY,
+            enableHealthChecks: options.enableHealthChecks ?? false,
+            healthCheckInterval: options.healthCheckInterval ?? DEFAULT_HEALTH_CHECK.HEALTH_CHECK_INTERVAL,
+            enableMessageQueue: options.enableMessageQueue ?? false,
+            worker: options.worker ?? {},
+            storage: options.storage ?? {},
+            ...this.options
+        };
+
+
+        // Transport fallback chain in order of preference: best first
         this.transports = [
-            new SharedWorkerTransport(namespace, options.worker),
-            new BroadcastChannelTransport(namespace),
-            new StorageEventTransport(namespace, options.storage),
+            new SharedWorkerTransport(this.namespace, this.options.worker),
+            new BroadcastChannelTransport(this.namespace),
+            new StorageEventTransport(this.namespace, this.options.storage),
         ].filter(t => t.isSupported());
 
-        // Log browser support info
         this.logBrowserSupport();
-
-        this.options.maxRetries = options.maxRetries || DEFAULT_QUEUE_CONFIG.MAX_RETRIES;
-        this.options.retryBackoff = options.retryBackoff || DEFAULT_QUEUE_CONFIG.RETRY_BACKOFF;
-        this.options.retryDelay = options.retryDelay || DEFAULT_QUEUE_CONFIG.RETRY_DELAY;
     }
 
     async connect(): Promise<void> {
@@ -40,6 +50,7 @@ export class FallbackChain implements Transport {
             try {
                 await transport.connect();
                 this.activeTransport = transport;
+
                 // Forward messages from the active transport to our callback
                 transport.onMessage((msg) => {
                     if (this.messageCallback) {
@@ -54,7 +65,9 @@ export class FallbackChain implements Transport {
                 }
 
                 // Process any queued messages
-                this.processQueue();
+                if(this.options.enableMessageQueue) {
+                    this.processQueue();
+                }
 
                 return;
             } catch (err) {
